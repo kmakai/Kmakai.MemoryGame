@@ -1,0 +1,119 @@
+﻿@page "/"
+@rendermode InteractiveWebAssembly
+
+
+<div class="w-100">
+
+    <div class="Menu border border-1 border-success rounded">
+        <button class="btn btn-success fs-3 d-flex justify-content-center align-items-center mx-auto" style="width: 200px;height: 200px;" @onclick="() => playing = !playing">Start</button>
+    </div>
+
+    @if (IsGameOver())
+    {
+        <h2>Game Over</h2>
+    }
+
+    @if (cardDisplayList != null && playing)
+    {
+        <div class="d-flex flex-wrap gap-2">
+            @foreach (var card in cardDisplayList)
+            {
+                <button class="rounded @(card.IsMatched ? "btn-success" : "btn-danger")" style="width: 100px;height:100px;" @onclick="() =>{ if(firstCard == null || secondCard == null ) FlipCard(card);}">
+                    @(card.IsFlipped ? card.Name : "")
+
+                </button>
+
+            }
+        </div>
+    }
+
+</div>
+
+@code {
+    private bool playing = false;
+    private List<Card> cardsList = new List<Card>();
+    private Card[]? cardDisplayList;
+
+    protected override void OnInitialized()
+    {
+        cardsList = CardList.GetCards();
+        cardDisplayList = new Card[cardsList.Count * 2];
+        int i = 0;
+        foreach (var card in cardsList)
+        {
+            cardDisplayList[i] = new Card()
+                {
+                    Image = card.Image,
+                    Name = card.Name,
+                    IsFlipped = card.IsFlipped,
+                    IsMatched = card.IsMatched
+                };
+            cardDisplayList[i + 1] = new Card()
+                {
+                    Image = card.Image,
+                    Name = card.Name,
+                    IsFlipped = card.IsFlipped,
+                    IsMatched = card.IsMatched
+                };
+
+            i += 2;
+        }
+
+        ShuffleCards();
+    }
+
+    private void ShuffleCards()
+    {
+        Random rng = new Random();
+        int n = cardDisplayList!.Length;
+        while (n > 1)
+        {
+            n--;
+            int k = rng.Next(n + 1);
+            var value = cardDisplayList[k];
+            cardDisplayList[k] = cardDisplayList[n];
+            cardDisplayList[n] = value;
+        }
+    }
+
+    private Card? firstCard = null;
+    private Card? secondCard = null;
+    private void FlipCard(Card card)
+    {
+        if (card.IsMatched || IsGameOver()) return;
+        
+
+        card.IsFlipped = true;
+
+        if (firstCard == null) firstCard = card;
+        else if (secondCard == null) secondCard = card;
+
+        if (firstCard != null && secondCard != null) CheckMatch();
+
+    }
+
+    private async void CheckMatch()
+    {
+        Console.WriteLine("Checking Match");
+        if (firstCard!.Name == secondCard!.Name)
+        {
+            firstCard.IsMatched = true;
+            secondCard.IsMatched = true;
+        }
+        else
+        {
+            await Task.Delay(2000);
+            firstCard.IsFlipped = false;
+            secondCard.IsFlipped = false;
+        }
+
+        firstCard = null;
+        secondCard = null;
+        StateHasChanged();
+    }
+
+
+
+    private bool IsGameOver() => cardDisplayList!.All(x => x.IsMatched);
+
+}
