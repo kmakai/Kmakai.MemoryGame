@@ -2,25 +2,87 @@
 @rendermode InteractiveWebAssembly
 
 
-<div class="w-100">
+<div class="w-100 h-100 d-flex flex-column">
+    @if (!playing || IsGameOver())
+    {
+        <div class="Menu border border-1 border-success rounded my-auto" style="">
+            <div class="gamemode">
+                <h1 class="text-center">Choose game mode</h1>
+                <div class="d-flex gap-2 w-100 justify-content-center">
+                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
+                        <h3>
+                            Normal
+                        </h3>
+                        <p>
+                            <small>See how long it takes to finish the game</small>
+                        </p>
+                    </button>
+                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
+                        <h3>
+                            Race Time
+                        </h3>
+                        <p>
+                            <small>Get the highest score in the given time</small>
+                        </p>
+                    </button>
+                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
+                        <h3>
+                            Moves
+                        </h3>
+                        <p>
+                            <small>Get as many matches in the amount of moves given</small>
+                        </p>
+                    </button>
+                </div>
+            </div>
+            <button class="btn btn-success fs-3 d-flex justify-content-center align-items-center mx-auto" style="width: 200px;height: 200px;" @onclick="() => playing = !playing">Start game</button>
 
-    <div class="Menu border border-1 border-success rounded">
-        <button class="btn btn-success fs-3 d-flex justify-content-center align-items-center mx-auto" style="width: 200px;height: 200px;" @onclick="() => playing = !playing">Start</button>
-    </div>
+            <div class="gamedifficulty">
+                <h1 class="text-center">Choose game difficulty</h1>
+                <div class="d-flex gap-2 w-100 justify-content-center">
+                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
+                        <h3>
+                            Easy
+                        </h3>
+                        <p>
+                            match 8 pairs of cards
+                        </p>
+                    </button>
+                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
+                        <h3>
+                            Normal
+                        </h3>
+                        <p>
+                            Match 12 pairs of cards
+                        </p>
+                    </button>
+                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
+                        <h3>
+                            Hard
+                        </h3>
+                        <p>
+                            Match 16 pairs of cards
+                        </p>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+    }
 
     @if (IsGameOver())
     {
+
         <h2>Game Over</h2>
     }
 
-    @if (cardDisplayList != null && playing)
+    @if (cardDisplayList != null && playing && !IsGameOver())
     {
-        <div class="d-flex flex-wrap gap-2">
+        <div class="d-flex flex-wrap gap-2 w-100 justify-content-center">
             @foreach (var card in cardDisplayList)
             {
-                <button class="rounded @(card.IsMatched ? "btn-success" : "btn-danger")" style="width: 100px;height:100px;" @onclick="() =>{ if(firstCard == null || secondCard == null ) FlipCard(card);}">
-                    @(card.IsFlipped ? card.Name : "")
-
+                <button class="p-0 rounded-3 border border-0" style="width:175px;height:250px;" @onclick="() =>{ if(firstCard == null || secondCard == null ) FlipCard(card);}">
+                    <img src="@(card.IsFlipped || card.IsMatched?@card.Image : "images/seal.png")" alt="@card.Name" class="w-100 h-100 m-0 rounded-2" />
                 </button>
 
             }
@@ -29,6 +91,8 @@
 
 </div>
 
+
+
 @code {
     private bool playing = false;
     private List<Card> cardsList = new List<Card>();
@@ -36,7 +100,7 @@
 
     protected override void OnInitialized()
     {
-        cardsList = CardList.GetCards();
+        cardsList = CardList.GetRandomCards(4);
         cardDisplayList = new Card[cardsList.Count * 2];
         int i = 0;
         foreach (var card in cardsList)
@@ -81,7 +145,7 @@
     private void FlipCard(Card card)
     {
         if (card.IsMatched || IsGameOver()) return;
-        
+
 
         card.IsFlipped = true;
 
@@ -89,6 +153,8 @@
         else if (secondCard == null) secondCard = card;
 
         if (firstCard != null && secondCard != null) CheckMatch();
+
+        if (IsGameOver()) Console.WriteLine("Game Over");
 
     }
 
@@ -102,7 +168,7 @@
         }
         else
         {
-            await Task.Delay(2000);
+            await Task.Delay(1000);
             firstCard.IsFlipped = false;
             secondCard.IsFlipped = false;
         }
