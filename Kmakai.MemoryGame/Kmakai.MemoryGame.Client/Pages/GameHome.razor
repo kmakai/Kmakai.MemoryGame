@@ -3,74 +3,83 @@
 
 
 <div class="w-100 h-100 d-flex flex-column">
-    @if (!playing || IsGameOver())
+    @if (!playing || (cardDisplayList != null && IsGameOver()))
     {
         <div class="Menu border border-1 border-success rounded my-auto" style="">
-            <div class="gamemode">
-                <h1 class="text-center">Choose game mode</h1>
-                <div class="d-flex gap-2 w-100 justify-content-center">
-                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
-                        <h3>
-                            Normal
-                        </h3>
-                        <p>
-                            <small>See how long it takes to finish the game</small>
-                        </p>
-                    </button>
-                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
-                        <h3>
-                            Race Time
-                        </h3>
-                        <p>
-                            <small>Get the highest score in the given time</small>
-                        </p>
-                    </button>
-                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
-                        <h3>
-                            Moves
-                        </h3>
-                        <p>
-                            <small>Get as many matches in the amount of moves given</small>
-                        </p>
-                    </button>
+            @if (mode == null)
+            {
+                <div class="gamemode">
+                    <h1 class="text-center">Choose game mode</h1>
+                    <div class="d-flex gap-2 w-100 justify-content-center">
+                        <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => mode = GameMode.Normal">
+                            <h3>
+                                Normal
+                            </h3>
+                            <p>
+                                <small>See how long it takes to finish the game</small>
+                            </p>
+                        </button>
+                        <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => mode = GameMode.RaceTime">
+                            <h3>
+                                Race Time
+                            </h3>
+                            <p>
+                                <small>Get the highest score in the given time</small>
+                            </p>
+                        </button>
+                        <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => mode = GameMode.Moves">
+                            <h3>
+                                Moves
+                            </h3>
+                            <p>
+                                <small>Get as many matches in the amount of moves given</small>
+                            </p>
+                        </button>
+                    </div>
                 </div>
-            </div>
-            <button class="btn btn-success fs-3 d-flex justify-content-center align-items-center mx-auto" style="width: 200px;height: 200px;" @onclick="() => playing = !playing">Start game</button>
+            }
 
-            <div class="gamedifficulty">
-                <h1 class="text-center">Choose game difficulty</h1>
-                <div class="d-flex gap-2 w-100 justify-content-center">
-                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
-                        <h3>
-                            Easy
-                        </h3>
-                        <p>
-                            match 8 pairs of cards
-                        </p>
-                    </button>
-                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
-                        <h3>
-                            Normal
-                        </h3>
-                        <p>
-                            Match 12 pairs of cards
-                        </p>
-                    </button>
-                    <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" >
-                        <h3>
-                            Hard
-                        </h3>
-                        <p>
-                            Match 16 pairs of cards
-                        </p>
-                    </button>
+            @if (mode != null && difficulty != null)
+            {
+                <button class="btn btn-success fs-3 d-flex justify-content-center align-items-center mx-auto" style="width: 200px;height: 200px;" @onclick="() => StartGame()">Start game</button>
+            }
+
+            @if (mode != null && difficulty == null)
+            {
+                <div class="gamedifficulty">
+                    <h1 class="text-center">Choose game difficulty</h1>
+                    <div class="d-flex gap-2 w-100 justify-content-center">
+                        <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => difficulty = GameDifficulty.Easy">
+                            <h3>
+                                Easy
+                            </h3>
+                            <p>
+                                match 8 pairs of cards
+                            </p>
+                        </button>
+                        <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => difficulty = GameDifficulty.Normal">
+                            <h3>
+                                Normal
+                            </h3>
+                            <p>
+                                Match 12 pairs of cards
+                            </p>
+                        </button>
+                        <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => difficulty = GameDifficulty.Hard">
+                            <h3>
+                                Hard
+                            </h3>
+                            <p>
+                                Match 16 pairs of cards
+                            </p>
+                        </button>
+                    </div>
                 </div>
-
-            </div>
+            }
         </div>
     }
 
-    @if (IsGameOver())
+    @if (cardDisplayList != null && IsGameOver())
     {
 
         <h2>Game Over</h2>
@@ -95,12 +104,16 @@
 
 @code {
     private bool playing = false;
-    private List<Card> cardsList = new List<Card>();
+    // private List<Card> cardsList = new List<Card>();
     private Card[]? cardDisplayList;
 
-    protected override void OnInitialized()
+    // testing
+    private GameMode? mode;
+    private GameDifficulty? difficulty;
+
+    private void StartGame()
     {
-        cardsList = CardList.GetRandomCards(4);
+        var cardsList = CardList.GetRandomCards(GameDifficultyExtensions.GetCardsNumber(difficulty ?? GameDifficulty.Normal));
         cardDisplayList = new Card[cardsList.Count * 2];
         int i = 0;
         foreach (var card in cardsList)
@@ -124,7 +137,40 @@
         }
 
         ShuffleCards();
+
+        playing = true;
+
+        
     }
+
+
+    // protected override void OnInitialized()
+    // {
+    //     cardsList = CardList.GetRandomCards(4);
+    //     cardDisplayList = new Card[cardsList.Count * 2];
+    //     int i = 0;
+    //     foreach (var card in cardsList)
+    //     {
+    //         cardDisplayList[i] = new Card()
+    //             {
+    //                 Image = card.Image,
+    //                 Name = card.Name,
+    //                 IsFlipped = card.IsFlipped,
+    //                 IsMatched = card.IsMatched
+    //             };
+    //         cardDisplayList[i + 1] = new Card()
+    //             {
+    //                 Image = card.Image,
+    //                 Name = card.Name,
+    //                 IsFlipped = card.IsFlipped,
+    //                 IsMatched = card.IsMatched
+    //             };
+
+    //         i += 2;
+    //     }
+
+    //     ShuffleCards();
+    // }
 
     private void ShuffleCards()
     {
