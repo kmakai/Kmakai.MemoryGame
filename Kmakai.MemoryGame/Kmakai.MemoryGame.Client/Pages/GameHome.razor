@@ -3,6 +3,23 @@
 
 
 <div class="w-100 h-100 d-flex flex-column">
+    <div class="top-row ps-3  navbar navbar-dark">
+        <div class="@(!playing ? "hidden" : "")">
+            @if (mode != GameMode.Moves)
+            {
+                <p class="">
+                    Time: @elapsedTime.ToString(@"hh\:mm\:ss") @(TimeLimit > 0 ? $" / 00:0{TimeLimit}:00" : "")
+                </p>
+            }
+            else
+            {
+                <p class="">
+                    Moves: @moves
+                </p>
+            }
+
+        </div>
+    </div>
     @if (!playing || (cardDisplayList != null && IsGameOver()))
     {
         <div class="Menu border border-1 border-success rounded my-auto" style="">
@@ -56,6 +73,18 @@
                             <p>
                                 match 8 pairs of cards
                             </p>
+                            @if (mode == GameMode.RaceTime)
+                            {
+                                <p>
+                                    <small>Time limit: 1 minutes</small>
+                                </p>
+                            }
+                            @if (mode == GameMode.Moves)
+                            {
+                                <p>
+                                    <small>Moves limit: 16</small>
+                                </p>
+                            }
                         </button>
                         <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => difficulty = GameDifficulty.Normal">
                             <h3>
@@ -64,6 +93,18 @@
                             <p>
                                 Match 12 pairs of cards
                             </p>
+                            @if (mode == GameMode.RaceTime)
+                            {
+                                <p>
+                                    <small>Time limit: 2 minute</small>
+                                </p>
+                            }
+                            @if (mode == GameMode.Moves)
+                            {
+                                <p>
+                                    <small>Moves limit: 24</small>
+                                </p>
+                            }
                         </button>
                         <button class="btn btn-success d-flex flex-column justify-content-center align-items-center" style="width: 200px;height: 200px;" @onclick="() => difficulty = GameDifficulty.Hard">
                             <h3>
@@ -72,6 +113,18 @@
                             <p>
                                 Match 16 pairs of cards
                             </p>
+                            @if (mode == GameMode.RaceTime)
+                            {
+                                <p>
+                                    <small>Time limit: 3 minutes</small>
+                                </p>
+                            }
+                            @if (mode == GameMode.Moves)
+                            {
+                                <p>
+                                    <small>Moves limit: 32</small>
+                                </p>
+                            }
                         </button>
                     </div>
                 </div>
@@ -90,7 +143,7 @@
         <div class="d-flex flex-wrap gap-2 w-100 justify-content-center">
             @foreach (var card in cardDisplayList)
             {
-                <button class="p-0 rounded-3 border border-0" style="width:175px;height:250px;" @onclick="() =>{ if(firstCard == null || secondCard == null ) FlipCard(card);}">
+                <button class="p-0 rounded-3 border border-0" style="width:125px;height:175px;" @onclick="() =>{ if(firstCard == null || secondCard == null ) FlipCard(card);}">
                     <img src="@(card.IsFlipped || card.IsMatched?@card.Image : "images/seal.png")" alt="@card.Name" class="w-100 h-100 m-0 rounded-2" />
                 </button>
 
@@ -103,16 +156,21 @@
 
 
 @code {
+
     private bool playing = false;
-    // private List<Card> cardsList = new List<Card>();
     private Card[]? cardDisplayList;
 
     // testing
     private GameMode? mode;
     private GameDifficulty? difficulty;
+    private Timer? timer;
 
     private void StartGame()
     {
+        if (mode == GameMode.RaceTime) SetTimeLimit();
+        timer = new Timer(NormalModeCallback!);
+        if (mode == GameMode.Normal || mode == GameMode.RaceTime) timer.start();
+        if (mode == GameMode.Moves) SetMoves();
         var cardsList = CardList.GetRandomCards(GameDifficultyExtensions.GetCardsNumber(difficulty ?? GameDifficulty.Normal));
         cardDisplayList = new Card[cardsList.Count * 2];
         int i = 0;
@@ -140,37 +198,61 @@
 
         playing = true;
 
-        
+
+    }
+
+    private TimeSpan elapsedTime;
+    public void NormalModeCallback(object state)
+    {
+        elapsedTime = DateTime.Now - timer!.StartTime;
+        StateHasChanged();
+        if (mode != GameMode.Moves || IsGameOver())
+        {
+            timer!.stop();
+        }
+    }
+
+    private int TimeLimit = 0;
+    private void SetTimeLimit()
+    {
+        switch (difficulty)
+        {
+            case GameDifficulty.Easy:
+                TimeLimit = 1;
+                break;
+            case GameDifficulty.Normal:
+                TimeLimit = 2;
+                break;
+            case GameDifficulty.Hard:
+                TimeLimit = 3;
+                break;
+            default:
+                TimeLimit = 0;
+                break;
+        }
+    }
+
+    private int moves = 0;
+    private void SetMoves()
+    {
+        switch (difficulty)
+        {
+            case GameDifficulty.Easy:
+                moves = 16;
+                break;
+            case GameDifficulty.Normal:
+                moves = 24;
+                break;
+            case GameDifficulty.Hard:
+                moves = 32;
+                break;
+            default:
+                moves = 0;
+                break;
+        }
     }
 
 
-    // protected override void OnInitialized()
-    // {
-    //     cardsList = CardList.GetRandomCards(4);
-    //     cardDisplayList = new Card[cardsList.Count * 2];
-    //     int i = 0;
-    //     foreach (var card in cardsList)
-    //     {
-    //         cardDisplayList[i] = new Card()
-    //             {
-    //                 Image = card.Image,
-    //                 Name = card.Name,
-    //                 IsFlipped = card.IsFlipped,
-    //                 IsMatched = card.IsMatched
-    //             };
-    //         cardDisplayList[i + 1] = new Card()
-    //             {
-    //                 Image = card.Image,
-    //                 Name = card.Name,
-    //                 IsFlipped = card.IsFlipped,
-    //                 IsMatched = card.IsMatched
-    //             };
-
-    //         i += 2;
-    //     }
-
-    //     ShuffleCards();
-    // }
 
     private void ShuffleCards()
     {
@@ -200,7 +282,11 @@
 
         if (firstCard != null && secondCard != null) CheckMatch();
 
-        if (IsGameOver()) Console.WriteLine("Game Over");
+        if (IsGameOver() && mode != GameMode.Moves)
+        {
+            timer!.stop();
+            Console.WriteLine($"Game Over - Your time is: {elapsedTime}");
+        }
 
     }
 
@@ -219,6 +305,8 @@
             secondCard.IsFlipped = false;
         }
 
+        if (mode == GameMode.Moves) moves--;
+
         firstCard = null;
         secondCard = null;
         StateHasChanged();
@@ -226,6 +314,20 @@
 
 
 
-    private bool IsGameOver() => cardDisplayList!.All(x => x.IsMatched);
+    private bool IsGameOver()
+    {
+        // cardDisplayList!.All(x => x.IsMatched) || elapsedTime.TotalMinutes >= TimeLimit;
+        switch (mode)
+        {
+            case GameMode.Normal:
+                return cardDisplayList!.All(x => x.IsMatched);
+            case GameMode.RaceTime:
+                return elapsedTime.TotalMinutes >= TimeLimit || cardDisplayList!.All(x => x.IsMatched);
+            case GameMode.Moves:
+                return moves <= 0 || cardDisplayList!.All(x => x.IsMatched);
+            default:
+                return false;
+        };
+    }
 
 }

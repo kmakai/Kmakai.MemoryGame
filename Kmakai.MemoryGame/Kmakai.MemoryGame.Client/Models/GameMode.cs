@@ -16,7 +16,7 @@ public enum GameDifficulty
 
 public static class GameDifficultyExtensions
 {
-    public static int GetCardsNumber(this GameDifficulty difficulty)
+    public static int GetCardsNumber(GameDifficulty difficulty)
     {
         return difficulty switch
         {
