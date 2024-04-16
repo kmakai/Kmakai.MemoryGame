@@ -2,18 +2,18 @@
 @rendermode InteractiveWebAssembly
 
 
-<div class="w-100 h-100 d-flex flex-column">
-    <div class="top-row ps-3  navbar navbar-dark">
-        <div class="@(!playing ? "hidden" : "")">
+<div class="w-100 h-100 d-flex flex-column position-relative">
+    <div class="w-100 bg-white position-fixed top-0 mt-0 pt-2 pb-0 ps-4">
+        <div class="@(!playing ? "hidden" : "") ps-2">
             @if (mode != GameMode.Moves)
             {
-                <p class="">
+                <p class="mb-0 fs-5">
                     Time: @elapsedTime.ToString(@"hh\:mm\:ss") @(TimeLimit > 0 ? $" / 00:0{TimeLimit}:00" : "")
                 </p>
             }
             else
             {
-                <p class="">
+                <p class="mb-0">
                     Moves: @moves
                 </p>
             }
@@ -140,7 +140,7 @@
 
     @if (cardDisplayList != null && playing && !IsGameOver())
     {
-        <div class="d-flex flex-wrap gap-2 w-100 justify-content-center">
+        <div class="d-flex flex-wrap gap-2 w-100 justify-content-center mt-4">
             @foreach (var card in cardDisplayList)
             {
                 <button class="p-0 rounded-3 border border-0" style="width:125px;height:175px;" @onclick="() =>{ if(firstCard == null || secondCard == null ) FlipCard(card);}">
@@ -205,11 +205,11 @@
     public void NormalModeCallback(object state)
     {
         elapsedTime = DateTime.Now - timer!.StartTime;
-        StateHasChanged();
-        if (mode != GameMode.Moves || IsGameOver())
+        if (mode != GameMode.Moves && IsGameOver())
         {
             timer!.stop();
         }
+        StateHasChanged();
     }
 
     private int TimeLimit = 0;
@@ -316,7 +316,6 @@
 
     private bool IsGameOver()
     {
-        // cardDisplayList!.All(x => x.IsMatched) || elapsedTime.TotalMinutes >= TimeLimit;
         switch (mode)
         {
             case GameMode.Normal:
