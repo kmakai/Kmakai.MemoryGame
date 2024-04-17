@@ -2,7 +2,7 @@
 
 public class Timer : ITimer
 {
-    private System.Threading.Timer GameTimer;
+    private System.Threading.Timer? GameTimer;
     public int Interval = 1000;
     public DateTime StartTime;
     public DateTime StopTime;
@@ -23,7 +23,7 @@ public class Timer : ITimer
     public void stop()
     {
         StopTime = DateTime.Now;
-        GameTimer.Dispose();
+        GameTimer!.Dispose();
         ElapsedTime = StopTime - StartTime;
     }
 

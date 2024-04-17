@@ -24,7 +24,7 @@ public class MovesGame
     public int Id { get; set; }
     public GameDifficulty GameDifficulty { get; set; }
     public DateTime Date { get; set; }
-    public int score { get; set; }
+    public int Score { get; set; }
     public int Moves { get; set; }
     public int MovesLimit { get; set; }
 }

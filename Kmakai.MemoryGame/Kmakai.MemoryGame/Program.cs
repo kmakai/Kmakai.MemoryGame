@@ -1,11 +1,19 @@
 using Kmakai.MemoryGame.Client.Pages;
 using Kmakai.MemoryGame.Components;
+using Microsoft.EntityFrameworkCore;
+using Kmakai.MemoryGame.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
+
+builder.Services.AddDbContext<GameContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("GameContext")));
+
+builder.Services.AddHttpClient();
+
+builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -29,5 +37,7 @@ app.UseAntiforgery();
 app.MapRazorComponents<App>()
     .AddInteractiveWebAssemblyRenderMode()
     .AddAdditionalAssemblies(typeof(Kmakai.MemoryGame.Client._Imports).Assembly);
+
+app.MapControllers();
 
 app.Run();
