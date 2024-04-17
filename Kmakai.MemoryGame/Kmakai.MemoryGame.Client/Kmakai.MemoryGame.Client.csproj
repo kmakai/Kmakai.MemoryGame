@@ -16,4 +16,10 @@
     <Folder Include="Components\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\bootstrap\bootstrap.min.css">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
 </Project>

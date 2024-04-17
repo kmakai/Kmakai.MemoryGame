@@ -1,5 +1,6 @@
 ﻿@page "/"
 @rendermode InteractiveWebAssembly
+@inject HttpClient ApiClient
 
 
 
@@ -166,19 +167,16 @@
                             @onclick="() => { playing = false; difficulty = null; cardDisplayList = null; Score = 0; elapsedTime = TimeSpan.Zero;}">
                         Change Difficulty
                     </button>
-                    <button class="btn btn-success">Save Game</button>
+                    <button class="btn btn-success" @onclick="SaveGame">Save Game</button>
                 </div>
 
             </div>
         </div>
-
-
-
     }
 
     @if (cardDisplayList != null && playing)
     {
-        <div class="d-flex flex-wrap gap-2 w-100 justify-content-center mt-4">
+        <div class="d-flex flex-wrap gap-2 w-100 justify-content-center mt-5">
             @foreach (var card in cardDisplayList)
             {
                 <button class="p-0 rounded-3 border border-0" style="width:125px;height:175px;" @onclick="() =>{ if(firstCard == null || secondCard == null ) FlipCard(card);}">
@@ -188,11 +186,11 @@
             }
         </div>
     }
-
 </div>
 
 
 @code {
+
 
     private int Score = 0;
     private bool playing = false;
@@ -202,6 +200,56 @@
     private GameMode? mode;
     private GameDifficulty? difficulty;
     private Timer? timer;
+
+    private async Task SaveGame()
+    {
+        if (mode == GameMode.Normal)
+        {
+            Console.WriteLine("Normal Mode: Save");
+
+            var game = new NormalGame()
+                {
+                    Duration = elapsedTime,
+                    GameDifficulty = difficulty ?? GameDifficulty.Normal,
+                    Date = DateTime.Now,
+
+                };
+
+            Console.WriteLine(game.ToString());
+
+            try
+            {
+                var response = await ApiClient.PostAsJsonAsync("api/NormalGame", game);
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Game saved");
+                }
+                else
+                {
+                    Console.WriteLine("Game not saved");
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+        }
+
+        if(mode == GameMode.RaceTime)
+        {
+            Console.WriteLine("Race Game Save");
+
+            var game = new RaceGame()
+            {
+                Duration = elapsedTime,
+                GameDifficulty = difficulty ?? GameDifficulty.Normal,
+                Date = DateTime.Now,
+                Score = Score
+            };
+        }
+    }
+
 
     private void StartGame()
     {
