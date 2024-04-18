@@ -1,6 +1,165 @@
 ﻿@page "/reports"
-<h3>Reports</h3>
+@inject HttpClient client
+
+
+<div class="container">
+    <div class="row">
+        <div class="normalgames col-5">
+            <h4>Normal Games</h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Pairs</th>
+                        <th>Time</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var game in NormalGames!)
+                    {
+                        <tr>
+                            <td>@game.Date.ToShortDateString()</td>
+                            <td>@(GameDifficultyExtensions.GetCardsNumber(game.GameDifficulty))</td>
+                            <td>@game.Duration.ToString(@"hh\:mm\:ss")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <a href="reports/normal" class="">View more</a>
+        </div>
+
+        <span class="col-1"></span>
+
+        <div class="racetimegames col-6">
+            <h4>
+                Race Time Games
+            </h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Score</th>
+                        <th>Time</th>
+                        <th>Time Limit</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var game in RaceTimeGames!)
+                    {
+                        <tr>
+                            <td>@game.Date.ToShortDateString()</td>
+                            <td>@game.Score</td>
+                            <td>@game.Duration.ToString(@"hh\:mm\:ss")</td>
+                            <td>@($"00:0{game.TimeLimit}:00")</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+            <a href="reports/racetime" class="">View more</a>
+
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="movesgames col-5">
+            <h4>
+                Moves Games
+            </h4>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Score</th>
+                        <th>Moves</th>
+                        <th>Moves Limit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var game in MovesGames!)
+                    {
+                        <tr>
+                            <td>@game.Date.ToShortDateString()</td>
+                            <td>@game.Score</td>
+                            <td>@(game.MovesLimit - game.Moves)</td>
+                            <td>@game.MovesLimit</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+            <a href="reports/moves" class="">View more</a>
+
+        </div>
+
+        <span class="col-1"></span>
+
+
+        <div class="averages col-6">
+            <h4>
+                Averages weekly, monthly, yearly.
+            </h4>
+
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Game Mode</th>
+                        <th>Weekly</th>
+                        <th>Monthly</th>
+                        <th>Yearly</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Normal</td>
+                        <td>100</td>
+                        <td>200</td>
+                        <td>300</td>
+                    </tr>
+                    <tr>
+                        <td>Race Time</td>
+                        <td>100</td>
+                        <td>200</td>
+                        <td>300</td>
+                    </tr>
+                    <tr>
+                        <td>Moves</td>
+                        <td>100</td>
+                        <td>200</td>
+                        <td>300</td>
+                    </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+
+</div>
 
 @code {
+    private List<NormalGame>? NormalGames = new List<NormalGame>();
+    private List<RaceGame>? RaceTimeGames = new List<RaceGame>();
+    private List<MovesGame>? MovesGames = new List<MovesGame>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        NormalGames = await client.GetFromJsonAsync<List<NormalGame>>("https://localhost:7275/api/NormalGame");
+        NormalGames = NormalGames?.OrderByDescending(x => x.Date).Take(5).ToList();
+
+        RaceTimeGames = await client.GetFromJsonAsync<List<RaceGame>>("https://localhost:7275/api/RaceGame");
+        RaceTimeGames = RaceTimeGames?.OrderByDescending(x => x.Date).Take(5).ToList();
+
+        MovesGames = await client.GetFromJsonAsync<List<MovesGame>>("https://localhost:7275/api/MovesGame");
+        MovesGames = MovesGames?.OrderByDescending(x => x.Date).Take(5).ToList();
+    }
 
 }
+
+@*
+<div>
+     <h4>Memory Game</h4>
+     <p>Memory Game is a game that tests your memory. You will be presented with a set of cards. Each card has an image on one side and is blank on the other side. You will need to remember the position of each card and match it with another card that has the same image. The game is over when all the cards have been matched.</p>
+ </div>
+*@ 

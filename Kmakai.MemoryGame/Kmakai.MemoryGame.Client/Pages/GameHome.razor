@@ -195,7 +195,6 @@
     private bool playing = false;
     private Card[]? cardDisplayList;
 
-    // testing
     private GameMode? mode;
     private GameDifficulty? difficulty;
     private Timer? timer;
@@ -299,7 +298,6 @@
         }
     }
 
-
     private void StartGame()
     {
         if (mode == GameMode.RaceTime) SetTimeLimit();
@@ -383,16 +381,14 @@
         }
     }
 
-
-
     private void ShuffleCards()
     {
-        Random rng = new Random();
+        Random rand = new Random();
         int n = cardDisplayList!.Length;
         while (n > 1)
         {
             n--;
-            int k = rng.Next(n + 1);
+            int k = rand.Next(n + 1);
             var value = cardDisplayList[k];
             cardDisplayList[k] = cardDisplayList[n];
             cardDisplayList[n] = value;
@@ -404,7 +400,6 @@
     private void FlipCard(Card card)
     {
         if (card.IsMatched || IsGameOver()) return;
-
 
         card.IsFlipped = true;
 
@@ -418,10 +413,6 @@
             timer!.stop();
             Console.WriteLine($"Game Over - Your time is: {elapsedTime}");
         }
-
-
-
-
     }
 
     private async void CheckMatch()
@@ -456,8 +447,6 @@
         Score = (int)Math.Round((double)cardCount / totalCardCount * 100);
 
     }
-
-
 
     private bool IsGameOver()
     {
