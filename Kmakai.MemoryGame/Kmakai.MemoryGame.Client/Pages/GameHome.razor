@@ -2,8 +2,6 @@
 @rendermode InteractiveWebAssembly
 @inject HttpClient ApiClient
 
-
-
 <div class="w-100 h-100 d-flex flex-column position-relative">
     <div class="w-100 bg-white position-fixed top-0 mt-0 pt-2 pb-0 ps-4">
 
@@ -208,7 +206,6 @@
     }
 </div>
 
-
 @code {
 
 
@@ -351,8 +348,6 @@
         ShuffleCards();
 
         playing = true;
-
-
     }
 
     private TimeSpan elapsedTime;
@@ -457,8 +452,6 @@
         firstCard = null;
         secondCard = null;
         StateHasChanged();
-
-
     }
 
     private void SetScore()
@@ -466,7 +459,6 @@
         var cardCount = cardDisplayList!.Count(x => x.IsMatched) / 2;
         var totalCardCount = cardDisplayList!.Length / 2;
         Score = (int)Math.Round((double)cardCount / totalCardCount * 100);
-
     }
 
     private bool IsGameOver()
@@ -484,5 +476,4 @@
                 return false;
         };
     }
-
 }
